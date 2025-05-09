@@ -24,7 +24,7 @@ const Chat = ({ message, lastChat }: ChatProps) => {
           message.sender === "User" && "chat-bubble-primary"
         }`}
       >
-        <div className="m-2">{message.message}</div>
+        <div className="m-2 whitespace-pre-line">{message.message}</div>
         {message.sources && message.sources.length > 0 && (
           <div
             className={`dropdown dropdown-hover ${
