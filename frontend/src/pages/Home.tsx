@@ -11,6 +11,7 @@ const Home = () => {
   const { chatId } = useParams();
   const [chats, setChats] = useState<Message[]>([]);
   const [prompt, setPrompt] = useState<string>("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [thinking, setThinking] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -34,11 +35,13 @@ const Home = () => {
         },
         body: JSON.stringify({
           prompt: userPrompt,
+          ...(sessionId && { sessionId }),
         }),
       });
 
       if (response.ok) {
         const body = await response.json();
+        setSessionId(body.sessionId);
         addMessage({
           sender: "Bot",
           message: body.response,
