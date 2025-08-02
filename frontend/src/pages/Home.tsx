@@ -19,6 +19,47 @@ const Home = () => {
     setChats((prev) => [...prev, message]);
   };
 
+  const handleFormSubmit = (formData: string) => {
+    addMessage({ sender: "User", message: formData });
+    setThinking(true);
+
+    // Send form data to backend
+    fetch(CHAT_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: formData,
+        ...(sessionId && { sessionId }),
+      }),
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          const body = await response.json();
+          console.log("body: ", body);
+          setSessionId(body.sessionId);
+          addMessage({
+            sender: "Bot",
+            message: body.response,
+            sources: body.sources,
+          });
+        } else {
+          throw new Error("Internal server error!");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        addMessage({
+          sender: "Bot",
+          message: "Sorry, I am unable to process your request at the moment.",
+        });
+      })
+      .finally(() => {
+        setThinking(false);
+      });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (prompt.trim() === "") return;
@@ -77,7 +118,7 @@ const Home = () => {
           {
             sender: "Bot",
             message:
-              "Hey there, I am TripMate - your all in one travel solution. How may I help you today?",
+              "Hey there, I am AURA - your personal requisition assistant. How may I help you today?",
           },
         ]);
       }
@@ -97,7 +138,7 @@ const Home = () => {
   return (
     <div className="mx-auto px-4 w-full">
       <div className="flex flex-col justify-center gap-2">
-        <ChatScreen chats={chats} thinking={thinking} />
+        <ChatScreen chats={chats} thinking={thinking} onFormSubmit={handleFormSubmit} />
         <form
           ref={formRef}
           className="mt-2 px-72 flex items-center justify-center gap-2"
